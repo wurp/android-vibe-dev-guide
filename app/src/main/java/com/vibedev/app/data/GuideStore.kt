@@ -28,6 +28,9 @@ class PrefsGuideStore(context: Context) : GuideStore {
                 name = o.optString("name"),
                 description = o.optString("description"),
                 step = o.optInt("step", 1),
+                openedSteps = o.optJSONArray("opened")
+                    ?.let { a -> (0 until a.length()).map { a.getInt(it) }.toSet() }
+                    ?: emptySet(),
             )
         }
     }
@@ -40,7 +43,8 @@ class PrefsGuideStore(context: Context) : GuideStore {
                     .put("id", it.id)
                     .put("name", it.name)
                     .put("description", it.description)
-                    .put("step", it.step),
+                    .put("step", it.step)
+                    .put("opened", JSONArray(it.openedSteps.toList())),
             )
         }
         prefs.edit().putString(KEY_APPS, json.toString()).apply()

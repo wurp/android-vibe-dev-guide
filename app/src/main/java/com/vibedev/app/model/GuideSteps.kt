@@ -12,6 +12,15 @@ object GuideSteps {
     const val START_IN_CLAUDE = 5
     const val INSTALL = 6
 
+    /** Steps where the user must open the page before moving on. */
+    fun needsOpening(step: Int) = step in setOf(CREATE_REPO, CLAUDE_ACCESS, START_IN_CLAUDE)
+
+    fun canContinue(app: StartedApp): Boolean = when {
+        app.step == DETAILS -> app.isNamed
+        needsOpening(app.step) -> app.step in app.openedSteps
+        else -> true
+    }
+
     fun title(step: Int): String = when (step) {
         SETUP -> "Before you start"
         DETAILS -> "Your app"

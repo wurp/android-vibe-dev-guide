@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.vibedev.app.R
 import com.vibedev.app.data.GuideState
@@ -76,7 +77,8 @@ fun GuideScreen(app: StartedApp, state: GuideState, onHome: () -> Unit) {
         bottomBar = {
             GuideBottomBar(
                 step = step,
-                canGoNext = step != GuideSteps.DETAILS || app.isNamed,
+                canGoNext = GuideSteps.canContinue(app.copy(step = step)),
+                lockedHint = if (GuideSteps.needsOpening(step)) "Open the page above first." else null,
                 onBack = { state.save(app.copy(step = step - 1)) },
                 onNext = {
                     state.save(app.copy(step = step + 1))
@@ -128,23 +130,28 @@ private fun StepHeader(step: Int) {
 
 @Composable
 private fun StepBody(step: Int, app: StartedApp, state: GuideState, links: Links) {
+    val opened = { state.save(app.copy(openedSteps = app.openedSteps + step)) }
     when (step) {
         GuideSteps.SETUP -> SetupStep(state, links)
         GuideSteps.DETAILS -> DetailsStep(app, state)
         GuideSteps.CREATE_REPO -> WebStep(
             intro = "Make your own copy of the starter app on GitHub. We've filled in the name and description for you.",
             bullets = GuideSteps.createRepoBullets(app),
-            onOpen = { links.openInTab(GuideSteps.createRepoUrl(app)) },
+            onOpen = { links.openInTab(GuideSteps.createRepoUrl(app)); opened() },
         )
         GuideSteps.CLAUDE_ACCESS -> {
             WebStep(
                 intro = "Let Claude work on your new repository.",
                 bullets = GuideSteps.claudeAccessBullets,
-                onOpen = { links.openInTab(GuideSteps.CLAUDE_ACCESS_URL) },
+                onOpen = { links.openInTab(GuideSteps.CLAUDE_ACCESS_URL); opened() },
             )
             Note("Already gave Claude all your repositories? You can skip this step.")
+            OutlinedButton(
+                onClick = { state.save(app.copy(step = step + 1)) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            ) { Text("Skip this step") }
         }
-        GuideSteps.START_IN_CLAUDE -> ClaudeHandoff(app, links)
+        GuideSteps.START_IN_CLAUDE -> ClaudeHandoff(app, links, onOpened = opened)
         GuideSteps.INSTALL -> {
             Text("Claude will send you a download link when your app is ready.", style = MaterialTheme.typography.bodyLarge)
             Tips(GuideSteps.installBullets, heading = "How to install it")
@@ -153,31 +160,47 @@ private fun StepBody(step: Int, app: StartedApp, state: GuideState, links: Links
 }
 
 @Composable
-private fun GuideBottomBar(step: Int, canGoNext: Boolean, onBack: () -> Unit, onNext: () -> Unit) {
+private fun GuideBottomBar(
+    step: Int,
+    canGoNext: Boolean,
+    lockedHint: String?,
+    onBack: () -> Unit,
+    onNext: () -> Unit,
+) {
     val last = step == GuideSteps.COUNT
     Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
-        Row(
+        Column(
             Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (step > GuideSteps.SETUP) {
-                OutlinedButton(onClick = onBack, modifier = Modifier.heightIn(min = 60.dp)) {
-                    AppIcon(R.drawable.ic_arrow_back, Modifier.size(22.dp), tint = LocalContentColor.current)
-                    Spacer(Modifier.width(6.dp))
-                    Text("Back")
-                }
+            if (!canGoNext && lockedHint != null) {
+                Text(
+                    lockedHint,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
-            PrimaryButton(
-                text = if (last) "Finish" else "Done, next step",
-                onClick = onNext,
-                enabled = canGoNext,
-                trailingIcon = if (last) R.drawable.ic_celebration else R.drawable.ic_arrow_forward,
-                modifier = Modifier.weight(1f),
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (step > GuideSteps.SETUP) {
+                    OutlinedButton(onClick = onBack, modifier = Modifier.heightIn(min = 60.dp)) {
+                        AppIcon(R.drawable.ic_arrow_back, Modifier.size(22.dp), tint = LocalContentColor.current)
+                        Spacer(Modifier.width(6.dp))
+                        Text("Back")
+                    }
+                }
+                PrimaryButton(
+                    text = if (last) "Finish" else "Done, next step",
+                    onClick = onNext,
+                    enabled = canGoNext,
+                    trailingIcon = if (last) R.drawable.ic_celebration else R.drawable.ic_arrow_forward,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }

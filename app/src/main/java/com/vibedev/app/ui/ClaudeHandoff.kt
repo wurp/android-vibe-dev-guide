@@ -34,7 +34,7 @@ import com.vibedev.app.ui.components.Tips
 
 /** Repository name, message to copy, and a button that hands off to the Claude app. */
 @Composable
-fun ClaudeHandoff(app: StartedApp, links: Links) {
+fun ClaudeHandoff(app: StartedApp, links: Links, onOpened: () -> Unit = {}) {
     val message = GuideSteps.claudeMessage(app)
     var copied by remember(message) { mutableStateOf(false) }
 
@@ -75,7 +75,10 @@ fun ClaudeHandoff(app: StartedApp, links: Links) {
             title = "Open Claude",
             subtitle = "Opens the Claude app",
             icon = R.drawable.ic_forum,
-            onClick = { links.openInApp(GuideSteps.CLAUDE_CODE_URL) },
+            onClick = {
+                links.openInApp(GuideSteps.CLAUDE_CODE_URL)
+                onOpened()
+            },
         )
     }
 }

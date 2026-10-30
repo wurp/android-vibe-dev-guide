@@ -6,6 +6,8 @@ data class StartedApp(
     val name: String = "",
     val description: String = "",
     val step: Int = 1,
+    /** Steps whose web page or app has been opened at least once. */
+    val openedSteps: Set<Int> = emptySet(),
 ) {
     val repo: String get() = repoNameFor(name)
     val isNamed: Boolean get() = name.isNotBlank()
