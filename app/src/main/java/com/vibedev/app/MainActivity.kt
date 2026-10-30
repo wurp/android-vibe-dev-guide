@@ -4,10 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
 import com.vibedev.app.data.GuideState
 import com.vibedev.app.data.PrefsGuideStore
 import com.vibedev.app.ui.AppNavigation
@@ -20,9 +16,7 @@ class MainActivity : ComponentActivity() {
         val state = GuideState(PrefsGuideStore(applicationContext))
         setContent {
             VibeAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(state, Modifier.padding(innerPadding))
-                }
+                AppNavigation(state)
                 CrashReportDialog()
             }
         }
