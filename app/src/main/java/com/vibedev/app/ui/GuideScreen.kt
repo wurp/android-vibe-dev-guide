@@ -154,7 +154,7 @@ private fun StepBody(step: Int, app: StartedApp, state: GuideState, links: Links
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             ) { Text("Claude already has all my repositories") }
         }
-        GuideSteps.START_IN_CLAUDE -> ClaudeHandoff(app, links, onOpened = opened)
+        GuideSteps.START_IN_CLAUDE -> ClaudeHandoff(app, state.githubUsername, links, onOpened = opened)
         GuideSteps.INSTALL -> {
             Text("Claude will send you a download link when your app is ready.", style = MaterialTheme.typography.bodyLarge)
             Tips(GuideSteps.installBullets, heading = "How to install it")
@@ -276,6 +276,17 @@ private fun DetailsStep(app: StartedApp, state: GuideState) {
         shape = MaterialTheme.shapes.medium,
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         minLines = 3,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    OutlinedTextField(
+        value = state.githubUsername,
+        onValueChange = { state.updateUsername(it) },
+        label = { Text("Your GitHub username") },
+        supportingText = { Text("Lets us open Claude on your new repository.") },
+        singleLine = true,
+        textStyle = MaterialTheme.typography.bodyLarge,
+        shape = MaterialTheme.shapes.medium,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
         modifier = Modifier.fillMaxWidth(),
     )
     if (app.isNamed) {

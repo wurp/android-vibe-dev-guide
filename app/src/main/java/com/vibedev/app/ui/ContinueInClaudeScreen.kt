@@ -22,7 +22,7 @@ import com.vibedev.app.ui.components.AppIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContinueInClaudeScreen(app: StartedApp, onBack: () -> Unit) {
+fun ContinueInClaudeScreen(app: StartedApp, githubUser: String, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -35,7 +35,7 @@ fun ContinueInClaudeScreen(app: StartedApp, onBack: () -> Unit) {
             Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 8.dp),
         ) {
-            ClaudeHandoff(app, Links(LocalContext.current))
+            ClaudeHandoff(app, githubUser, Links(LocalContext.current))
         }
     }
 }

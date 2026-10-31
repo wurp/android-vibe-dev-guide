@@ -15,12 +15,14 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
@@ -34,7 +36,18 @@ import com.vibedev.app.ui.components.Tips
 
 /** Repository name, message to copy, and a button that hands off to the Claude app. */
 @Composable
-fun ClaudeHandoff(app: StartedApp, links: Links, onOpened: () -> Unit = {}) {
+fun ClaudeHandoff(app: StartedApp, githubUser: String, links: Links, onOpened: () -> Unit = {}) {
+    // Re-check on every return, so installing Claude and coming back updates the screen.
+    var claudeInstalled by remember { mutableStateOf(true) }
+    LifecycleResumeEffect(Unit) {
+        claudeInstalled = links.isAppInstalled(GuideSteps.CLAUDE_APP_PACKAGE)
+        onPauseOrDispose { }
+    }
+    val openClaude = {
+        links.openInApp(GuideSteps.claudeCodeUrl(githubUser, app))
+        onOpened()
+    }
+
     val message = GuideSteps.claudeMessage(app)
     var copied by remember(message) { mutableStateOf(false) }
 
@@ -71,14 +84,18 @@ fun ClaudeHandoff(app: StartedApp, links: Links, onOpened: () -> Unit = {}) {
             }
         }
         Tips(GuideSteps.startInClaudeBullets(app))
-        LinkCard(
-            title = "Open Claude",
-            subtitle = "Opens the Claude app",
-            icon = R.drawable.ic_forum,
-            onClick = {
-                links.openInApp(GuideSteps.CLAUDE_CODE_URL)
-                onOpened()
-            },
-        )
+        if (claudeInstalled) {
+            LinkCard(title = "Open Claude", subtitle = "Opens the Claude app", icon = R.drawable.ic_forum, onClick = openClaude)
+        } else {
+            LinkCard(
+                title = "Get the Claude app",
+                subtitle = "Install it from the Play Store, then come back here.",
+                icon = R.drawable.ic_download,
+                onClick = { links.openPlayStore(GuideSteps.CLAUDE_APP_PACKAGE) },
+            )
+            TextButton(onClick = openClaude, modifier = Modifier.fillMaxWidth()) {
+                Text("Or use Claude in the browser")
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
@@ -26,6 +27,22 @@ class Links(private val context: Context) {
             context.startActivity(view(url).setPackage("com.android.chrome"))
         } catch (e: ActivityNotFoundException) {
             context.startActivity(view(url))
+        }
+    }
+
+    fun isAppInstalled(packageName: String): Boolean = try {
+        context.packageManager.getPackageInfo(packageName, 0)
+        true
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
+
+    /** The Play Store app's page, or the Play website if the store app is missing. */
+    fun openPlayStore(packageName: String) = attempt {
+        try {
+            context.startActivity(view("market://details?id=$packageName"))
+        } catch (e: ActivityNotFoundException) {
+            context.startActivity(view("https://play.google.com/store/apps/details?id=$packageName"))
         }
     }
 

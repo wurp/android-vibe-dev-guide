@@ -63,6 +63,12 @@ object GuideSteps {
 
     const val CLAUDE_ACCESS_URL = "https://github.com/apps/claude/installations/new"
     const val CLAUDE_CODE_URL = "https://claude.ai/code"
+    const val CLAUDE_APP_PACKAGE = "com.anthropic.claude"
+
+    /** Opens Claude Code with the app's repository already chosen, when we know the owner. */
+    fun claudeCodeUrl(githubUser: String, app: StartedApp): String =
+        if (githubUser.isBlank()) CLAUDE_CODE_URL
+        else "$CLAUDE_CODE_URL?repositories=${encode(githubUser)}/${encode(app.repo)}"
 
     fun createRepoBullets(app: StartedApp) = listOf(
         "Check the name says ${app.repo}.",
@@ -79,14 +85,13 @@ object GuideSteps {
     fun claudeMessage(app: StartedApp) = "Start my new app in ${app.repo} from its description."
 
     fun startInClaudeBullets(app: StartedApp) = listOf(
-        "The Claude app opens on the repository you used last. Tap the name above the message box and choose ${app.repo}.",
+        "Check that the name above the message box says ${app.repo}. If not, tap it and choose ${app.repo}.",
         "Paste the message and send it.",
         "Come back here when Claude gives you a download link.",
     )
 
     val installBullets = listOf(
-        "In Claude, long-press the download link and tap Copy link.",
-        "Paste it into Chrome's address bar. Chrome needs to be signed in to GitHub.",
+        "Open the download link Claude gives you in Chrome. Chrome needs to be signed in to GitHub.",
         "If Chrome warns about the file, tap Download anyway, then tap the download to install.",
         "The first time, allow installs from Chrome. This is normal for apps not from the Play Store.",
         "The first time, Google Play Protect asks you to confirm. Say yes; it asks only once.",

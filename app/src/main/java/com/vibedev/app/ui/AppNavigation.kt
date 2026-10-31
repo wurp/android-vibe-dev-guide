@@ -36,7 +36,7 @@ fun AppNavigation(state: GuideState) {
             ?.let { GuideScreen(it, state, onHome = { go(Screen.Home) }) }
             ?: LaunchedEffect(s) { go(Screen.Home) }
         is Screen.Claude -> state.app(s.appId)
-            ?.let { ContinueInClaudeScreen(it, onBack = { go(Screen.Home) }) }
+            ?.let { ContinueInClaudeScreen(it, state.githubUsername, onBack = { go(Screen.Home) }) }
             ?: LaunchedEffect(s) { go(Screen.Home) }
     }
 }
