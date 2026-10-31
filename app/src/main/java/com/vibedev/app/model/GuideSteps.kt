@@ -43,6 +43,7 @@ object GuideSteps {
                 "Choose your account.",
                 "Under Repository access, choose All repositories.",
                 "Tap Save. Then you can skip step 4 for every app.",
+                AFTER_SAVE,
             ),
         ),
     )
@@ -80,7 +81,11 @@ object GuideSteps {
         "Choose your account.",
         "Under Repository access, add your new repository.",
         "Tap Save.",
+        AFTER_SAVE,
     )
+
+    private const val AFTER_SAVE =
+        "Saving opens the Claude app. That's expected: come back to this guide (swipe back or use recent apps)."
 
     fun claudeMessage(app: StartedApp) = "Start my new app in ${app.repo} from its description."
 
