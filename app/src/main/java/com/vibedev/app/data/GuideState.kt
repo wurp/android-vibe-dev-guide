@@ -38,6 +38,11 @@ class GuideState(private val store: GuideStore) {
         store.githubUsername = githubUsername
     }
 
+    val claudeSeesAllRepos: Boolean get() = isChecked(GuideSteps.ALL_REPOS)
+
+    fun goNext(app: StartedApp) = save(app.copy(step = GuideSteps.next(app.step, claudeSeesAllRepos)))
+    fun goBack(app: StartedApp) = save(app.copy(step = GuideSteps.previous(app.step, claudeSeesAllRepos)))
+
     fun isChecked(key: String) = checks.getOrPut(key) { store.isChecked(key) }
     fun setChecked(key: String, checked: Boolean) {
         checks[key] = checked

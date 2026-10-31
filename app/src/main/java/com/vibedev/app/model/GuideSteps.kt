@@ -35,7 +35,26 @@ object GuideSteps {
         ChecklistItem("plan", "A Claude Pro or Max plan", null),
         ChecklistItem("github", "A free GitHub account", "https://github.com/signup"),
         ChecklistItem("connect", "Connect GitHub to Claude (once)", "https://claude.ai/code"),
+        ChecklistItem(
+            ALL_REPOS,
+            "Let Claude see all your repositories (recommended)",
+            CLAUDE_ACCESS_URL,
+            bullets = listOf(
+                "Choose your account.",
+                "Under Repository access, choose All repositories.",
+                "Tap Save. Then you can skip step 4 for every app.",
+            ),
+        ),
     )
+
+    /** Checklist key: once ticked, step 4 is skipped for every app. */
+    const val ALL_REPOS = "allrepos"
+
+    fun next(step: Int, claudeSeesAllRepos: Boolean): Int =
+        if (step + 1 == CLAUDE_ACCESS && claudeSeesAllRepos) step + 2 else step + 1
+
+    fun previous(step: Int, claudeSeesAllRepos: Boolean): Int =
+        if (step - 1 == CLAUDE_ACCESS && claudeSeesAllRepos) step - 2 else step - 1
 
     fun createRepoUrl(app: StartedApp): String =
         "https://github.com/new?template_owner=wurp&template_name=vibe-dev-template" +
@@ -80,4 +99,9 @@ object GuideSteps {
     private fun encode(text: String) = URLEncoder.encode(text, "UTF-8")
 }
 
-data class ChecklistItem(val key: String, val label: String, val url: String?)
+data class ChecklistItem(
+    val key: String,
+    val label: String,
+    val url: String?,
+    val bullets: List<String> = emptyList(),
+)

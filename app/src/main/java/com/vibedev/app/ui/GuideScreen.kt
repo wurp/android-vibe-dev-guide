@@ -79,9 +79,9 @@ fun GuideScreen(app: StartedApp, state: GuideState, onHome: () -> Unit) {
                 step = step,
                 canGoNext = GuideSteps.canContinue(app.copy(step = step)),
                 lockedHint = if (GuideSteps.needsOpening(step)) "Open the page above first." else null,
-                onBack = { state.save(app.copy(step = step - 1)) },
+                onBack = { state.goBack(app) },
                 onNext = {
-                    state.save(app.copy(step = step + 1))
+                    state.goNext(app)
                     if (step == GuideSteps.COUNT) onHome()
                 },
             )
@@ -145,11 +145,14 @@ private fun StepBody(step: Int, app: StartedApp, state: GuideState, links: Links
                 bullets = GuideSteps.claudeAccessBullets,
                 onOpen = { links.openInTab(GuideSteps.CLAUDE_ACCESS_URL); opened() },
             )
-            Note("Already gave Claude all your repositories? You can skip this step.")
+            Note("Tip: choose All repositories instead, and this step is skipped for your future apps.")
             OutlinedButton(
-                onClick = { state.save(app.copy(step = step + 1)) },
+                onClick = {
+                    state.setChecked(GuideSteps.ALL_REPOS, true)
+                    state.goNext(app)
+                },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-            ) { Text("Skip this step") }
+            ) { Text("Claude already has all my repositories") }
         }
         GuideSteps.START_IN_CLAUDE -> ClaudeHandoff(app, links, onOpened = opened)
         GuideSteps.INSTALL -> {
@@ -219,7 +222,8 @@ private fun SetupStep(state: GuideState, links: Links) {
                     else MaterialTheme.colorScheme.surfaceContainerLow,
                 ),
             ) {
-                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+              Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     AppIcon(
                         if (checked) R.drawable.ic_check_circle else R.drawable.ic_radio_button_unchecked,
                         Modifier.size(30.dp),
@@ -235,6 +239,15 @@ private fun SetupStep(state: GuideState, links: Links) {
                         }
                     }
                 }
+                item.bullets.forEachIndexed { i, line ->
+                    Text(
+                        "${i + 1}. $line",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 44.dp),
+                    )
+                }
+              }
             }
         }
     }
